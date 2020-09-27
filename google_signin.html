@@ -1,0 +1,92 @@
+<html>
+<head>
+	<meta name="google-signin-client_id" content="506865414348-lrblt8k21vef8uou7168mt9l4fn860qc.apps.googleusercontent.com">
+	<script src="https://apis.google.com/js/platform.js" async defer>
+	</script>
+</head>
+<body>
+  <h3> Google login Button
+  <br>
+	<div class="g-signin2" data-onsuccess="onSignIn"></div>
+  <br>
+  <a href="#" onclick="signOut();">Sign out</a>
+	<script>
+
+    // get google auth token to be able to send to backend
+    function onSignIn(googleUser) {
+      var token = googleUser.getAuthResponse().id_token;
+      //debugger;
+      console.log('auth_token:' + token);
+      //token_authenticity(token);
+      server_call(googleUser.nt);
+    }
+
+    // signout
+    function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+    }
+
+    // To verify the authenticity of the auth token for testing using gooles tokeninfo api
+    // This should be a part of backend server job. Illustrated only to check response body.
+    //Sample response object
+    // {
+    //   "iss": "accounts.google.com",
+    //   "azp": "506865414348-lrblt8k21vef8uou7168mt9l4fn860qc.apps.googleusercontent.com",
+    //   "aud": "506865414348-lrblt8k21vef8uou7168mt9l4fn860qc.apps.googleusercontent.com",
+    //   "sub": "109100440335466374636",
+    //   "hd": "getacquired.com",
+    //   "email": "testdev@getacquired.com",
+    //   "email_verified": "true",
+    //   "at_hash": "s1ApGY840cz7EGMum_e3mw",
+    //   "name": "Test Developer",
+    //   "picture": "https://lh4.googleusercontent.com/-Bqs_vMZEbgU/AAAAAAAAAAI/AAAAAAAAAAA/AMZuuckM-Mz7ifGfEeXp1U56EEES_8Jqtg/s96-c/photo.jpg",
+    //   "given_name": "Test",
+    //   "family_name": "Developer",
+    //   "locale": "en",
+    //   "iat": "1601168950",
+    //   "exp": "1601172550",
+    //   "jti": "24ce5844d40367c4d5e2b7d9b4ee8a6ec17e0364",
+    //   "alg": "RS256",
+    //   "kid": "2c6fa6f5950a7ce465fcf247aa0b094828ac952c",
+    //   "typ": "JWT"
+    // }
+    function token_authenticity(token){
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://oauth2.googleapis.com/tokeninfo');
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.onload = function() {
+        console.log('Signed in as: ' + xhr.responseText);
+      };
+      xhr.send('id_token=' + token);
+    }
+
+    function server_call1(resp){
+      var xhr = new XMLHttpRequest();
+      var url = "http://361ffac2f8a9.ngrok.io/users/sign_in.json";
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onload = function(res) {
+        console.log('Signed in as: ' + xhr.responseText);
+      };
+      var data = JSON.stringify({user: {email: 'testdev@getacquired.com'}});
+      xhr.send(data);
+    }
+
+
+    function server_call(resp){
+      var xhr = new XMLHttpRequest();
+      var url = "http://6d49ce6db8b1.ngrok.io/auth/google.json";
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onload = function(res) {
+        console.log('Signed in as: ' + xhr.responseText);
+      };
+      var data = JSON.stringify(resp);
+      xhr.send(data);
+    }
+  </script>
+</body>
+</html>
